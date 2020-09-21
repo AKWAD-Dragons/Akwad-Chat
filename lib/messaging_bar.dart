@@ -58,30 +58,38 @@ class _MessagingBarState extends State<MessagingBar> {
             // visible: !typing,
             child: Row(
               children: <Widget>[
-                SizedBox(
-                  width: 16,
-                ),
-                InkWell(
-                    onTap: () async {
-                      // ImageSource src = await pickerSourceDialog(context);
-                      // if (src == null) return;
-                      // openImagePicker(src);
-                    },
-                    child: widget.photeIcon),
-                SizedBox(
-                  width: 20,
-                ),
-                InkWell(
-                  child: widget.micIcon,
-                  // onTap: () =>
-                  // showModalBottomSheet(
-                  //     context: context,
-                  //     builder: (BuildContext context) => AudioBottomSheet()),
-                ),
+                photoButton(),
+                micButton(),
               ],
             ),
           )
         ],
+      ),
+    );
+  }
+
+  Widget photoButton() {
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(start: 16),
+      child: InkWell(
+          onTap: () async {
+            // ImageSource src = await pickerSourceDialog(context);
+            // if (src == null) return;
+            // openImagePicker(src);
+          },
+          child: widget.photeIcon),
+    );
+  }
+
+  Widget micButton() {
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(start: 20),
+      child: InkWell(
+        child: widget.micIcon,
+        // onTap: () =>
+        // showModalBottomSheet(
+        //     context: context,
+        //     builder: (BuildContext context) => AudioBottomSheet()),
       ),
     );
   }
