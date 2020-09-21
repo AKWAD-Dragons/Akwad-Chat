@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>334973215246-6fnd7cvkljms6hgnn1hjru92kegrcpsl.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.334973215246-6fnd7cvkljms6hgnn1hjru92kegrcpsl</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>334973215246-s2ouap8cdshjf9j61jkdhf8jqgucutt5.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCSduokrnAc2mnNMXhY7uJxuiw4gPTtYcI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>334973215246</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.akwadChat</string>
+	<key>PROJECT_ID</key>
+	<string>akwadchattest</string>
+	<key>STORAGE_BUCKET</key>
+	<string>akwadchattest.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:334973215246:ios:ebe8a7e088c853a2ca925f</string>
+	<key>DATABASE_URL</key>
+	<string>https://akwadchattest.firebaseio.com</string>
+</dict>
+</plist>
