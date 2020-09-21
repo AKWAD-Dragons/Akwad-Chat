@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "334973215246",
+    "firebase_url": "https://akwadchattest.firebaseio.com",
+    "project_id": "akwadchattest",
+    "storage_bucket": "akwadchattest.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:334973215246:android:ec45b7ae17cd7fcaca925f",
+        "android_client_info": {
+          "package_name": "com.example.akwad_chat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "334973215246-s2ouap8cdshjf9j61jkdhf8jqgucutt5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.akwad_chat",
+            "certificate_hash": "272ca38e8c5e0745ab294622a784d3b99973e841"
+          }
+        },
+        {
+          "client_id": "334973215246-2jteqluuc2h961nvp633ena74mk89ehb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMkyirPlRE5QVd8-OteLx_12WvJJnJptc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "334973215246-2jteqluuc2h961nvp633ena74mk89ehb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
