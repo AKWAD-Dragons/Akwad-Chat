@@ -3,13 +3,16 @@ import 'package:json_annotation/json_annotation.dart';
 part 'Participant.g.dart';
 
 @JsonSerializable()
-class Participant{
+class Participant {
   String id;
   String name;
-  List<String> permissons;
-  Participant(this.id,this.name,this.permissons);
+  List<String> rooms;
+  List<String> permissions;
 
-  factory Participant.fromJson(Map<String, dynamic> json) => _$ParticipantFromJson(json);
+  Participant(this.id, this.name, this.permissions);
+
+  factory Participant.fromJson(Map<String, dynamic> json) =>
+      _$ParticipantFromJson(json);
 
   Map<String, dynamic> toJson() => _$ParticipantToJson(this);
 }

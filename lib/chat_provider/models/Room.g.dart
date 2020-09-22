@@ -8,21 +8,29 @@ part of 'Room.dart';
 
 Room _$RoomFromJson(Map<String, dynamic> json) {
   return Room(
-    json['id'] as String,
-    Room.getParticipants(json['participants']),
+    json['name'] as String,
+    json['image'] as String,
+    (json['participants'] as List)
+        ?.map((e) =>
+            e == null ? null : Participant.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
     (json['messages'] as List)
         ?.map((e) =>
             e == null ? null : Message.fromJson(e as Map<String, dynamic>))
         ?.toList(),
-    json['lastMassage'] == null
+    json['metaData'] as Map<String, dynamic>,
+    json['lastMessage'] == null
         ? null
-        : Message.fromJson(json['lastMassage'] as Map<String, dynamic>),
-  );
+        : Message.fromJson(json['lastMessage'] as Map<String, dynamic>),
+  )..id = json['id'] as String;
 }
 
 Map<String, dynamic> _$RoomToJson(Room instance) => <String, dynamic>{
       'id': instance.id,
+      'name': instance.name,
+      'image': instance.image,
       'participants': instance.participants,
       'messages': instance.messages,
-      'lastMassage': instance.lastMassage,
+      'metaData': instance.metaData,
+      'lastMessage': instance.lastMessage,
     };

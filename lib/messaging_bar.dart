@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 class MessagingBar extends StatefulWidget {
   final Widget micIcon;
   final Widget photeIcon;
+
   MessagingBar({
     @required this.micIcon,
     @required this.photeIcon,

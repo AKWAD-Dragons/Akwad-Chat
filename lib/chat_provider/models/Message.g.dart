@@ -8,16 +8,15 @@ part of 'Message.dart';
 
 Message _$MessageFromJson(Map<String, dynamic> json) {
   return Message(
-    json['id'] as String,
     json['text'] as String,
-    json['type'] as String,
-    json['seen'] as bool,
-  );
+    (json['seenBy'] as List)?.map((e) => e as String)?.toList(),
+    json['time'] == null ? null : DateTime.parse(json['time'] as String),
+  )..id = json['id'] as String;
 }
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'id': instance.id,
       'text': instance.text,
-      'type': instance.type,
-      'seen': instance.seen,
+      'seenBy': instance.seenBy,
+      'time': instance.time?.toIso8601String(),
     };
