@@ -1,4 +1,6 @@
+import 'package:akwad_chat/chat_provider/models/ChatAttachment.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../FirebaseChatConfigs.dart';
 import 'Message.dart';
 import 'Participant.dart';
@@ -21,6 +23,9 @@ class Room {
 
   @JsonKey(ignore: true)
   DatabaseReference _dbr = FirebaseDatabase.instance.reference();
+
+  @JsonKey(ignore: true)
+  final StorageReference storageReference = FirebaseStorage().ref();
 
   @JsonKey(ignore: true)
   FirebaseChatConfigs _configs = FirebaseChatConfigs.instance;
@@ -64,7 +69,32 @@ class Room {
   Room setRoomFromSnapshot(DataSnapshot snapshot) {
     Map<String, dynamic> roomJson = Map<String, dynamic>.from(snapshot.value);
     if (roomJson.containsKey("messages")) {
-      roomJson["messages"] = roomJson["messages"]
+      List messagesJsonList;
+      messagesJsonList = roomJson["messages"].keys.map((key) {
+        var messageMap = Map<String, dynamic>.from(roomJson["messages"][key]);
+        if (messageMap.containsKey("attachments")) {
+          List<Map<String, dynamic>> attachments =
+              List<Map<String, dynamic>>.from(messageMap["attachments"]
+                  .map((value) => Map<String, dynamic>.from(value))
+                  .toList());
+
+          messageMap['attachments'] = attachments;
+        }
+        messageMap['id'] = key;
+        return messageMap;
+      }).toList();
+
+      messagesJsonList.sort((a, b) {
+        return a['id'].compareTo(b['id']);
+      });
+
+      roomJson['messages'] = messagesJsonList;
+    }
+    if (roomJson.containsKey("meta_data")) {
+      roomJson['meta_data'] = Map<String, dynamic>.from(roomJson["meta_data"]);
+    }
+    if (roomJson.containsKey("participants")) {
+      roomJson['participants'] = roomJson["participants"]
           .values
           .map((value) => Map<String, dynamic>.from(value))
           .toList();
@@ -81,14 +111,52 @@ class Room {
 
   Stream<List<Message>> mute() {}
 
-  Future<void> send(Message msg) async {
-    //TODO::check for attachments and generate links
-    await _dbr.child(messagesLink).push().set(msg.toJson());
+  Map<String, dynamic> send(Message msg) {
+    if (msg.attachments?.isNotEmpty ?? false) {
+      Map<String, dynamic> tasksMap = _uploadAttachments(msg.attachments);
+      handleStorageUploadTasks(tasksMap).then((uploadedAttachments) {
+        msg.attachments = uploadedAttachments;
+        _dbr.child(messagesLink).push().set(msg.toJson());
+      });
+      return tasksMap;
+    }
+    return {"send_task": _dbr.child(messagesLink).push().set(msg.toJson())};
+  }
+
+  Future<List<ChatAttachment>> handleStorageUploadTasks(
+      Map<String, dynamic> tasks) async {
+    List<Future<StorageTaskSnapshot>> futureSnaps = List();
+    List<ChatAttachment> chatAttach = List();
+    tasks.forEach((key, value) async {
+      StorageUploadTask task = value["task"];
+      futureSnaps.add(task.onComplete.then((StorageTaskSnapshot sts) async {
+        ChatAttachment attach = ChatAttachment(type: value['type']);
+        attach.fileLink = await sts.ref.getDownloadURL();
+        chatAttach.add(attach);
+        return sts;
+      }));
+    });
+    await Future.wait(futureSnaps);
+    return chatAttach;
+  }
+
+  Map<String, dynamic> _uploadAttachments(List<ChatAttachment> attachments) {
+    Map<String, dynamic> uploadTasks = {};
+    attachments.forEach((ChatAttachment attachment) {
+      StorageUploadTask task = storageReference
+          .child("$id/${DateTime.now().millisecondsSinceEpoch}")
+          .putFile(attachment.file);
+      uploadTasks[attachment.key ?? DateTime.now().millisecondsSinceEpoch] = {
+        "task": task,
+        "type": attachment.type
+      };
+    });
+    return uploadTasks;
   }
 
   Future<void> setSeen(Message msg, [bool seen = true]) async {
     await _dbr
-        .child(roomLink + "/meta_data/participants/${_configs.myParticipantID}")
+        .child(roomLink + "/participants/${_configs.myParticipantID}")
         .set({'last_seen_message': msg.id});
   }
 

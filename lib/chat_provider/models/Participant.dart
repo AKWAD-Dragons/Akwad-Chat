@@ -6,6 +6,8 @@ part 'Participant.g.dart';
 class Participant {
   String id;
   String name;
+  @JsonKey(name: "last_seen_message")
+  String lastSeenMessage;
   List<String> rooms;
   List<String> permissions;
 

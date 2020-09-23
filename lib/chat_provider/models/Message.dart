@@ -1,15 +1,16 @@
+import 'package:akwad_chat/chat_provider/models/ChatAttachment.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'Message.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Message {
   String id;
   String text;
-  List<String> seenBy;
   DateTime time;
+  List<ChatAttachment> attachments;
 
-  Message(this.text,this.seenBy,this.time);
+  Message({this.text,this.attachments});
 
 
   factory Message.fromJson(Map<String, dynamic> json) =>

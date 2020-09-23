@@ -8,12 +8,16 @@ import 'models/Room.dart';
 class ChatProvider {
   Lobby _lobby;
 
-  Lobby get lobby=>_lobby;
+  Lobby get lobby => _lobby;
 
   ChatProvider() {
-    if(!FirebaseChatConfigs.instance.isInit){
+    if (!FirebaseChatConfigs.instance.isInit) {
       throw "call FirebaseChatConfigs.instance.init() first";
     }
     _lobby = Lobby();
   }
+}
+
+class AttachmentTypes {
+  static const String IMAGE = 'image', VIDEO = 'video', AUDIO = 'audio';
 }

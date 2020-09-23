@@ -1,13 +1,23 @@
+import 'dart:io';
+
+import 'package:akwad_chat/chat_provider/chat_provider.dart';
+import 'package:akwad_chat/chat_provider/models/ChatAttachment.dart';
+import 'package:akwad_chat/chat_provider/models/Message.dart';
+import 'package:akwad_chat/chat_provider/models/Room.dart';
 import 'package:akwad_chat/resources/colors.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class MessagingBar extends StatefulWidget {
   final Widget micIcon;
   final Widget photeIcon;
+  final Room room;
 
   MessagingBar({
     @required this.micIcon,
     @required this.photeIcon,
+    this.room,
   });
 
   @override
@@ -15,6 +25,11 @@ class MessagingBar extends StatefulWidget {
 }
 
 class _MessagingBarState extends State<MessagingBar> {
+  File _image;
+  final picker = ImagePicker();
+  String progress;
+  TextEditingController controller = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -35,12 +50,14 @@ class _MessagingBarState extends State<MessagingBar> {
                     child: Container(
                       margin: EdgeInsets.only(top: 5, bottom: 5),
                       child: TextFormField(
+                        controller: controller,
                         textCapitalization: TextCapitalization.sentences,
                         keyboardType: TextInputType.multiline,
                         minLines: 1,
                         maxLines: 4,
                         // controller: _controller,
                         decoration: InputDecoration.collapsed(
+                          hintText: "Type a message",
                           // hintText: AppStrings.typeYourMessage,
                           hintStyle: TextStyle(
                             color: AppColors.gray,
@@ -69,17 +86,53 @@ class _MessagingBarState extends State<MessagingBar> {
     );
   }
 
+  Future getImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      _image = File(pickedFile.path);
+      sendMessage();
+    } else {
+      print('No image selected.');
+    }
+  }
+
   Widget photoButton() {
-    return Padding(
-      padding: const EdgeInsetsDirectional.only(start: 16),
-      child: InkWell(
-          onTap: () async {
-            // ImageSource src = await pickerSourceDialog(context);
-            // if (src == null) return;
-            // openImagePicker(src);
-          },
-          child: widget.photeIcon),
+    return Container(
+      child: Padding(
+        padding: const EdgeInsetsDirectional.only(start: 16),
+        child: progress == null
+            ? InkWell(
+                onTap: () {
+                  getImage();
+                },
+                child: widget.photeIcon)
+            : Text(progress),
+      ),
     );
+  }
+
+  sendMessage() {
+    Map<String, dynamic> tasksMap = widget.room.send(
+        Message(text: controller.text, attachments: [
+      ChatAttachment(key: "image", type: AttachmentTypes.IMAGE, file: _image)
+    ]));
+    StorageUploadTask task = tasksMap["image"]['task'];
+    task.events.listen((event) {
+      if (event.type == StorageTaskEventType.success) {
+        setState(() {
+          event.snapshot.ref.getDownloadURL();
+          progress = null;
+        });
+      } else {
+        setState(() {
+          progress = (event.snapshot.bytesTransferred /
+                      event.snapshot.totalByteCount *
+                      100)
+                  .toStringAsPrecision(3) +
+              "%";
+        });
+      }
+    });
   }
 
   Widget micButton() {
