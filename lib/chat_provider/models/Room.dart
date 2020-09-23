@@ -14,7 +14,9 @@ class Room {
   String image;
   List<Participant> participants;
   List<Message> messages;
+  @JsonKey(name: "meta_data")
   Map<String, dynamic> metaData;
+  @JsonKey(name: "last_message")
   Message lastMessage;
 
   @JsonKey(ignore: true)
@@ -61,7 +63,7 @@ class Room {
 
   Room setRoomFromSnapshot(DataSnapshot snapshot) {
     Map<String, dynamic> roomJson = Map<String, dynamic>.from(snapshot.value);
-    if(roomJson.containsKey("messages")) {
+    if (roomJson.containsKey("messages")) {
       roomJson["messages"] = roomJson["messages"]
           .values
           .map((value) => Map<String, dynamic>.from(value))
@@ -85,7 +87,9 @@ class Room {
   }
 
   Future<void> setSeen(Message msg, [bool seen = true]) async {
-    await _dbr.child(roomLink + "/${msg.id}").set({'seen': seen});
+    await _dbr
+        .child(roomLink + "/meta_data/participants/${_configs.myParticipantID}")
+        .set({'last_seen_message': msg.id});
   }
 
   factory Room.fromJson(Map<String, dynamic> json) => _$RoomFromJson(json);

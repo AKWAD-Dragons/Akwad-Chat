@@ -18,10 +18,10 @@ Room _$RoomFromJson(Map<String, dynamic> json) {
         ?.map((e) =>
             e == null ? null : Message.fromJson(e as Map<String, dynamic>))
         ?.toList(),
-    json['metaData'] as Map<String, dynamic>,
-    json['lastMessage'] == null
+    json['meta_data'] as Map<String, dynamic>,
+    json['last_message'] == null
         ? null
-        : Message.fromJson(json['lastMessage'] as Map<String, dynamic>),
+        : Message.fromJson(json['last_message'] as Map<String, dynamic>),
   )..id = json['id'] as String;
 }
 
@@ -31,6 +31,6 @@ Map<String, dynamic> _$RoomToJson(Room instance) => <String, dynamic>{
       'image': instance.image,
       'participants': instance.participants,
       'messages': instance.messages,
-      'metaData': instance.metaData,
-      'lastMessage': instance.lastMessage,
+      'meta_data': instance.metaData,
+      'last_message': instance.lastMessage,
     };
