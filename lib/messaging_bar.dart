@@ -112,25 +112,29 @@ class _MessagingBarState extends State<MessagingBar> {
   }
 
   sendMessage() {
-    Map<String, dynamic> tasksMap = widget.room.send(
+    SendMessageTask task = widget.room.send(
         Message(text: controller.text, attachments: [
       ChatAttachment(key: "image", type: AttachmentTypes.IMAGE, file: _image)
     ]));
-    StorageUploadTask task = tasksMap["image"]['task'];
-    task.events.listen((event) {
-      if (event.type == StorageTaskEventType.success) {
-        setState(() {
-          event.snapshot.ref.getDownloadURL();
-          progress = null;
-        });
-      } else {
-        setState(() {
-          progress = (event.snapshot.bytesTransferred /
-                      event.snapshot.totalByteCount *
-                      100)
-                  .toStringAsPrecision(3) +
-              "%";
-        });
+    task.addOnProgressListener((_) {
+      setState(() {
+        progress =
+            (task.totalDone / task.totalSize * 100).toStringAsPrecision(3) +
+                "%";
+      });
+    });
+    task.addOnCompleteListener((List<ChatAttachment> attachements) {
+      setState(() {
+        progress = null;
+      });
+    });
+
+    task.getTaskByKey("image").events.listen((event) {
+      if(event is TaskUpdateEvent){
+
+      }
+      if(event is TaskCompletedEvent){
+
       }
     });
   }

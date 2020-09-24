@@ -9,6 +9,8 @@ import 'dart:async';
 
 part 'Room.g.dart';
 
+part '../SendTask.dart';
+
 @JsonSerializable()
 class Room {
   String id;
@@ -23,9 +25,6 @@ class Room {
 
   @JsonKey(ignore: true)
   DatabaseReference _dbr = FirebaseDatabase.instance.reference();
-
-  @JsonKey(ignore: true)
-  final StorageReference storageReference = FirebaseStorage().ref();
 
   @JsonKey(ignore: true)
   FirebaseChatConfigs _configs = FirebaseChatConfigs.instance;
@@ -111,45 +110,30 @@ class Room {
 
   Stream<List<Message>> mute() {}
 
-  Map<String, dynamic> send(Message msg) {
+  SendMessageTask send(Message msg) {
     if (msg.attachments?.isNotEmpty ?? false) {
-      Map<String, dynamic> tasksMap = _uploadAttachments(msg.attachments);
-      handleStorageUploadTasks(tasksMap).then((uploadedAttachments) {
+      SendMessageTask sendMessageTask =
+          SendMessageTask._(_createUploadAttachmentsTasks(msg.attachments));
+      sendMessageTask
+          .addOnCompleteListener((List<ChatAttachment> uploadedAttachments) {
         msg.attachments = uploadedAttachments;
         _dbr.child(messagesLink).push().set(msg.toJson());
       });
-      return tasksMap;
+      sendMessageTask.startAllTasks();
+      return sendMessageTask;
     }
-    return {"send_task": _dbr.child(messagesLink).push().set(msg.toJson())};
+    return SendMessageTask._({"send_task": _SingleUploadTask._(null, null)});
   }
 
-  Future<List<ChatAttachment>> handleStorageUploadTasks(
-      Map<String, dynamic> tasks) async {
-    List<Future<StorageTaskSnapshot>> futureSnaps = List();
-    List<ChatAttachment> chatAttach = List();
-    tasks.forEach((key, value) async {
-      StorageUploadTask task = value["task"];
-      futureSnaps.add(task.onComplete.then((StorageTaskSnapshot sts) async {
-        ChatAttachment attach = ChatAttachment(type: value['type']);
-        attach.fileLink = await sts.ref.getDownloadURL();
-        chatAttach.add(attach);
-        return sts;
-      }));
-    });
-    await Future.wait(futureSnaps);
-    return chatAttach;
-  }
-
-  Map<String, dynamic> _uploadAttachments(List<ChatAttachment> attachments) {
-    Map<String, dynamic> uploadTasks = {};
+  Map<String, _SingleUploadTask> _createUploadAttachmentsTasks(
+      List<ChatAttachment> attachments) {
+    Map<String, _SingleUploadTask> uploadTasks = {};
     attachments.forEach((ChatAttachment attachment) {
-      StorageUploadTask task = storageReference
-          .child("$id/${DateTime.now().millisecondsSinceEpoch}")
-          .putFile(attachment.file);
-      uploadTasks[attachment.key ?? DateTime.now().millisecondsSinceEpoch] = {
-        "task": task,
-        "type": attachment.type
-      };
+      String path = "$id/${DateTime.now().millisecondsSinceEpoch}";
+      _SingleUploadTask singleTask = _SingleUploadTask._(attachment, path);
+
+      uploadTasks[attachment.key ?? DateTime.now().millisecondsSinceEpoch] =
+          singleTask;
     });
     return uploadTasks;
   }
