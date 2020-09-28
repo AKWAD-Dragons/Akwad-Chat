@@ -1,4 +1,4 @@
-import '../../chat_provider/models/Room.dart';
+import 'package:akwadchat/chat_provider/models/Room.dart';
 
 abstract class ChatState{}
 

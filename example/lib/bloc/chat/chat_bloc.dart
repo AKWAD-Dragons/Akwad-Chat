@@ -1,6 +1,5 @@
 import 'package:akwad_chat/bloc/bloc.dart';
-
-import '../../chat_provider/chat_provider.dart';
+import 'package:akwadchat/chat_provider/chat_provider.dart';
 import 'chat_event.dart';
 
 class ChatBloc extends BLoC<ChatEvent> {

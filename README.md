@@ -1,16 +1,16 @@
-# akwad_chat
+# akwadchat
 
-A new Flutter application.
+This is Akwad's package for chatting
 
-## Getting Started
+## Usage
 
-This project is a starting point for a Flutter application.
+### Initialization
 
-A few resources to get you started if this is your first Flutter project:
+first you need to provide the package with the base link of the Users table,the Rooms table and the current user id in firebase
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+`FirebaseChatConfigs.instance.init(usersLink: "Users", roomsLink: "Rooms", myParticipantID: "testuser");`
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+then get the current user lobby(a list of chat rooms with some data like title, image, last message, etc)
+
+`ChatProvider chatProvider = ChatProvider();`
+`lobby = chatProvider.lobby;`

@@ -1,7 +1,7 @@
-import 'package:akwad_chat/chat_provider/models/ChatAttachment.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../FirebaseChatConfigs.dart';
+import 'ChatAttachment.dart';
 import 'Message.dart';
 import 'Participant.dart';
 import 'package:json_annotation/json_annotation.dart';

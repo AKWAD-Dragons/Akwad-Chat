@@ -1,5 +1,6 @@
-import 'package:akwad_chat/chat_provider/models/ChatAttachment.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+import 'ChatAttachment.dart';
 
 part 'Message.g.dart';
 

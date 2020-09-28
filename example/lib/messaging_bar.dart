@@ -1,10 +1,6 @@
 import 'dart:io';
-
-import 'package:akwad_chat/chat_provider/chat_provider.dart';
-import 'package:akwad_chat/chat_provider/models/ChatAttachment.dart';
-import 'package:akwad_chat/chat_provider/models/Message.dart';
-import 'package:akwad_chat/chat_provider/models/Room.dart';
 import 'package:akwad_chat/resources/colors.dart';
+import 'package:akwadchat/akwadchat.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';

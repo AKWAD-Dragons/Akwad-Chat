@@ -1,9 +1,5 @@
-import 'package:akwad_chat/chat_provider/FirebaseChatConfigs.dart';
-import 'package:akwad_chat/chat_provider/models/Lobby.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:rxdart/rxdart.dart';
-
-import 'models/Room.dart';
+import 'FirebaseChatConfigs.dart';
+import 'models/Lobby.dart';
 
 class ChatProvider {
   Lobby _lobby;

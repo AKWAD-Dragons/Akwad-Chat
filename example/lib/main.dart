@@ -1,18 +1,10 @@
-import 'package:akwad_chat/chat_provider/FirebaseChatConfigs.dart';
-import 'package:akwad_chat/chat_provider/chat_provider.dart';
-import 'package:akwad_chat/chat_provider/models/Lobby.dart';
-import 'package:akwad_chat/chat_provider/models/Message.dart';
 import 'package:akwad_chat/messaging_bar.dart';
+import 'package:akwadchat/akwadchat.dart';
 import 'package:bubble/bubble.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import 'chat_provider/models/ChatAttachment.dart';
-import 'chat_provider/models/Room.dart';
-
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Future.delayed(Duration(seconds: 2));
   runApp(MyApp());
 }
 
