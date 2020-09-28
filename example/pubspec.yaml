@@ -31,7 +31,7 @@ dependencies:
   cached_network_image:
   bubble: ^1.1.9+1
   akwadchat:
-    path: "D:/MyWorkSpace/4-Mobile/Cross-Platform/Flutter/akwad_chat_package/akwad_chat"
+    git: "https://github.com/AKWAD-Dragons/Akwad-Chat.git"
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

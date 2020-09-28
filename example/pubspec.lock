@@ -11,9 +11,11 @@ packages:
   akwadchat:
     dependency: "direct main"
     description:
-      path: "D:/MyWorkSpace/4-Mobile/Cross-Platform/Flutter/akwad_chat_package/akwad_chat"
-      relative: false
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "477410333cdf1d8819e85ebb2b342b72c3755cee"
+      url: "https://github.com/AKWAD-Dragons/Akwad-Chat.git"
+    source: git
     version: "0.0.1"
   analyzer:
     dependency: transitive

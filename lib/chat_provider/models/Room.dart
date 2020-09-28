@@ -122,6 +122,7 @@ class Room {
       sendMessageTask.startAllTasks();
       return sendMessageTask;
     }
+    _dbr.child(messagesLink).push().set(msg.toJson());
     return SendMessageTask._({"send_task": _SingleUploadTask._(null, null)});
   }
 
