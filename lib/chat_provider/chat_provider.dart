@@ -15,5 +15,8 @@ class ChatProvider {
 }
 
 class AttachmentTypes {
-  static const String IMAGE = 'image', VIDEO = 'video', AUDIO = 'audio';
+  static const String IMAGE = 'image',
+      VIDEO = 'video',
+      AUDIO = 'audio',
+      FILE = "file";
 }

@@ -108,10 +108,14 @@ class _MessagingBarState extends State<MessagingBar> {
   }
 
   sendMessage() {
-    SendMessageTask task = widget.room.send(
-        Message(text: controller.text, attachments: [
-      ChatAttachment(key: "image", type: AttachmentTypes.IMAGE, file: _image)
-    ]));
+    SendMessageTask task = widget.room.send(Message(
+        text: controller.text,
+        attachments: _image != null
+            ? [
+                ChatAttachment(
+                    type: AttachmentTypes.IMAGE, file: _image, key: "image"),
+              ]
+            : null));
     task.addOnProgressListener((_) {
       setState(() {
         progress =
@@ -126,12 +130,8 @@ class _MessagingBarState extends State<MessagingBar> {
     });
 
     task.getTaskByKey("image").events.listen((event) {
-      if(event is TaskUpdateEvent){
-
-      }
-      if(event is TaskCompletedEvent){
-
-      }
+      if (event is TaskUpdateEvent) {}
+      if (event is TaskCompletedEvent) {}
     });
   }
 
@@ -152,6 +152,7 @@ class _MessagingBarState extends State<MessagingBar> {
     return Container(
       child: InkWell(
         onTap: () {
+          sendMessage();
           setState(() {});
         },
         child: Container(
