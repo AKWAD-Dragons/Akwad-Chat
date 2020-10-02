@@ -1,6 +1,7 @@
 class FirebaseChatConfigs {
   String _roomsLink;
   String _usersLink;
+  String _myParticipantToken;
   String _myParticipantID;
   bool _isInit = false;
 
@@ -25,19 +26,28 @@ class FirebaseChatConfigs {
     return _usersLink;
   }
 
+  String get myParticipantToken {
+    _checkNull(_myParticipantToken, "myParticipantToken");
+    return _myParticipantToken;
+  }
   String get myParticipantID {
     _checkNull(_myParticipantID, "myParticipantID");
     return _myParticipantID;
   }
 
+  set myParticipantID(String myParticipantID) {
+    _myParticipantID = myParticipantID;
+  }
+
   bool get isInit=>_isInit;
 
 
-  void init({String roomsLink, String usersLink, String myParticipantID}) {
+
+  void init({String roomsLink, String usersLink, String myParticipantToken}) {
     _isInit = true;
     _roomsLink = roomsLink ?? _roomsLink;
     _usersLink = usersLink ?? _usersLink;
-    _myParticipantID = myParticipantID ?? _myParticipantID;
+    _myParticipantToken = myParticipantToken ?? _myParticipantToken;
   }
 
   void _checkNull(dynamic variable, String name) {

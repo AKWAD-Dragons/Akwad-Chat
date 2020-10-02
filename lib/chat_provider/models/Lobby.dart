@@ -40,7 +40,7 @@ class Lobby {
   List<Room> setRoomsFromSnapshot(DataSnapshot snapshot) {
     if (snapshot.value == null) return [];
     rooms = [];
-    snapshot.value.forEach((valueMap) {
+    snapshot.value.values.forEach((valueMap) {
       rooms.add(Room.fromJson(Map<String, dynamic>.from(valueMap)));
     });
 

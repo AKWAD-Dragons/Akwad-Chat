@@ -129,10 +129,10 @@ class _MessagingBarState extends State<MessagingBar> {
       });
     });
 
-    task.getTaskByKey("image").events.listen((event) {
-      if (event is TaskUpdateEvent) {}
-      if (event is TaskCompletedEvent) {}
-    });
+    // task.getTaskByKey("image").events.listen((event) {
+    //   if (event is TaskUpdateEvent) {}
+    //   if (event is TaskCompletedEvent) {}
+    // });
   }
 
   Widget micButton() {

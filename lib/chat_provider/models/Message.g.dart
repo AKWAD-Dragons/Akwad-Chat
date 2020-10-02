@@ -16,8 +16,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
         ?.toList(),
   )
     ..id = json['id'] as String
-    ..time =
-        json['time'] == null ? null : DateTime.parse(json['time'] as String);
+    ..time = Message.dateFromMilliSec(json['time']);
 }
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{

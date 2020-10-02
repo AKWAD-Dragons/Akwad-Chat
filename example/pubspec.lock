@@ -8,15 +8,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "7.0.0"
-  akwadchat:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "2042c22f99149d57eed6d85b52addbd2607ffead"
-      url: "https://github.com/AKWAD-Dragons/Akwad-Chat.git"
-    source: git
-    version: "0.0.1"
   analyzer:
     dependency: transitive
     description:
@@ -249,14 +240,14 @@ packages:
     source: hosted
     version: "0.1.1+2"
   firebase_database:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: firebase_database
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.1"
   firebase_storage:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: firebase_storage
       url: "https://pub.dartlang.org"

@@ -117,12 +117,12 @@ class Room {
       sendMessageTask
           .addOnCompleteListener((List<ChatAttachment> uploadedAttachments) {
         msg.attachments = uploadedAttachments;
-        _dbr.child(messagesLink).push().set(msg.toJson());
+        _dbr.child("buffer/$id").push().set(msg.toJson());
       });
       sendMessageTask.startAllTasks();
       return sendMessageTask;
     }
-    _dbr.child(messagesLink).push().set(msg.toJson());
+    _dbr.child("buffer/$id").push().set(msg.toJson());
     return SendMessageTask._({"send_task": _SingleUploadTask._(null, null)});
   }
 
@@ -142,7 +142,7 @@ class Room {
   Future<void> setSeen(Message msg, [bool seen = true]) async {
     await _dbr
         .child(roomLink + "/participants/${_configs.myParticipantID}")
-        .set({'last_seen_message': msg.id});
+        .update({'last_seen_message': msg.id});
   }
 
   factory Room.fromJson(Map<String, dynamic> json) => _$RoomFromJson(json);
