@@ -7,6 +7,7 @@ class Participant {
   String id;
   String name;
   @JsonKey(name: "last_seen_message")
+  Map meta_data;
   String lastSeenMessage;
   List<String> rooms;
   List<String> permissions;

@@ -8,6 +8,7 @@ part 'Message.g.dart';
 class Message {
   String id;
   String text;
+  String user_id;
   @JsonKey(fromJson:dateFromMilliSec)
   DateTime time;
   List<ChatAttachment> attachments;

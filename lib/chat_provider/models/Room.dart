@@ -140,6 +140,9 @@ class Room {
   }
 
   Future<void> setSeen(Message msg, [bool seen = true]) async {
+    if(msg==null){
+      return;
+    }
     await _dbr
         .child(roomLink + "/participants/${_configs.myParticipantID}")
         .update({'last_seen_message': msg.id});

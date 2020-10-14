@@ -16,11 +16,13 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
         ?.toList(),
   )
     ..id = json['id'] as String
+    ..user_id = json['user_id'] as String
     ..time = Message.dateFromMilliSec(json['time']);
 }
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'id': instance.id,
+      'user_id': instance.user_id,
       'text': instance.text,
       'time': instance.time?.toIso8601String(),
       'attachments': instance.attachments?.map((e) => e?.toJson())?.toList(),
