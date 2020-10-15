@@ -8,6 +8,7 @@ import 'models/Lobby.dart';
 class ChatProvider {
   Lobby _lobby;
   FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
+  bool _isInit = false;
 
   ChatProvider() {
     if (!FirebaseChatConfigs.instance.isInit) {
@@ -16,16 +17,36 @@ class ChatProvider {
     _lobby = Lobby();
   }
 
-  Future<Lobby> getLobby() async {
+  Future<void> init(Function onTokenExpired) async {
     await Firebase.initializeApp();
-    if(FirebaseAuth.instance.currentUser!=null){
-      FirebaseChatConfigs.instance.myParticipantID = FirebaseAuth.instance.currentUser.uid;
-      return _lobby;
+    if (FirebaseAuth.instance.currentUser != null) {
+      FirebaseChatConfigs.instance.myParticipantID =
+          FirebaseAuth.instance.currentUser.uid;
     }
-    UserCredential creds = await FirebaseAuth.instance
-        .signInWithCustomToken(FirebaseChatConfigs.instance.myParticipantToken);
+    UserCredential creds;
+    await FirebaseAuth.instance
+        .signInWithCustomToken(FirebaseChatConfigs.instance.myParticipantToken)
+        .then((value) => creds = value)
+        .catchError((ex) async {
+      if (ex.code == "invalid-custom-token") {
+        print("Token is invalid or expired\nretrying with onTokenExpired");
+        await FirebaseAuth.instance
+            .signInWithCustomToken(onTokenExpired())
+            .then((value) => creds = value)
+            .catchError((e) => throw e);
+        return;
+      }
+      throw ex;
+    });
     FirebaseChatConfigs.instance.myParticipantID = creds.user.uid;
     await subscribeToNotifications();
+    _isInit = true;
+  }
+
+  Lobby getLobby() {
+    if (!_isInit) {
+      throw "must call init";
+    }
     return _lobby;
   }
 

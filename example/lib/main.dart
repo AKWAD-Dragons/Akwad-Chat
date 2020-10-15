@@ -3,7 +3,9 @@ import 'package:akwadchat/akwadchat.dart';
 import 'package:bubble/bubble.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-String token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwczovL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbS9nb29nbGUuaWRlbnRpdHkuaWRlbnRpdHl0b29sa2l0LnYxLklkZW50aXR5VG9vbGtpdCIsImlhdCI6MTYwMTY1NDA0OSwiZXhwIjoxNjAxNjU3NjQ5LCJpc3MiOiJmaXJlYmFzZS1hZG1pbnNkay1ndjFxbUBha3dhZGNoYXR0ZXN0LmlhbS5nc2VydmljZWFjY291bnQuY29tIiwic3ViIjoiZmlyZWJhc2UtYWRtaW5zZGstZ3YxcW1AYWt3YWRjaGF0dGVzdC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsInVpZCI6Ii1NSWUwSmRKSVhtTnN2UElrbWROIn0.gT73zG87cVtwSVPzLsHaJUGJaE_TT2Sai7DMo2q37t1jNLbkIRXwE3F8gbgEEeZeoX4n924F695lfbyrtYfOJbSXCPIWHtQIOaZ7n_LYRwg2cF_VMkVJKT3xIMqjVUI3-xXaO59TJDDnXwHxkLXOzAtw-doFwfH8aKax9hNt-w2RpKwidRinD-7djAsbHWGbsku82RdRxh1qe85q4t5INASUS8C8C2UdXbJeqqN_4VO3N10PvHA-e8UV3NqiUMDEThuto493PPqfjlNP3V9oIhj16ojxs6n9Jjw5MU2FBmZcsqnKXFbadkCg6wo2A1oksu0ysx5rjfItpAXCiHDpQg";
+
+String token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwczovL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbS9nb29nbGUuaWRlbnRpdHkuaWRlbnRpdHl0b29sa2l0LnYxLklkZW50aXR5VG9vbGtpdCIsImlhdCI6MTYwMjc2ODY1MSwiZXhwIjoxNjAyNzcyMjUxLCJpc3MiOiJmaXJlYmFzZS1hZG1pbnNkay1ndjFxbUBha3dhZGNoYXR0ZXN0LmlhbS5nc2VydmljZWFjY291bnQuY29tIiwic3ViIjoiZmlyZWJhc2UtYWRtaW5zZGstZ3YxcW1AYWt3YWRjaGF0dGVzdC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsInVpZCI6Ii1NSmdTQktZZWgwaFJweHRVSkNkIn0.sg2yVL8j73mf2rzwPXzWarwYDNTA-XKCGVY_HSW4_hPyiLiLd0DkKUtpjYNpEOo2DohcfYMsRB9wOQCLGBa9RsT08Y1BkKyFtMUwIb6UkFCe8Hm6cLi_G8psQgT2XFd0Gue2c8IHi2hFGHfEOR2B1u-2rywTkueEaghlJ5mmgUXDZUTvwiGVaDYA_a_Xv3c030vJWC03X1l4Sh1Z84eQyL8nOOqhTEdIZANwHe8F0Pnp7BdCjsHxthtBJDaxkRWlhMdMGcvxGeQcmV2nH1-TzEdzpJu2WXGxCmjsmQH0VpltkRSUSKnboX7KyQyMC3VXqvCKbALhk2BaZc9wQQMU2w";
+String fakeToken = "eyJhdWQiOiJodHRwczovL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbS9nb29nbGUuaWRlbnRpdHkuaWRlbnRpdHl0b29sa2l0LnYxLklkZW50aXR5VG9vbGtpdCIsImlhdCI6MTYwMjc1Mzk2MCwiZXhwIjoxNjAyNzU3NTYwLCJpc3MiOiJmaXJlYmFzZS1hZG1pbnNkay1ndjFxbUBha3dhZGNoYXR0ZXN0LmlhbS5nc2VydmljZWFjY291bnQuY29tIiwic3ViIjoiZmlyZWJhc2UtYWRtaW5zZGstZ3YxcW1AYWt3YWRjaGF0dGVzdC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsInVpZCI6Ii1NSmZXQ29WR3pxQmd2ZHpMY3JBIn0.sJexS6Q56kelNytzXSmQmgRC6CtgWm9UmtN55XzOgIxshKoqhVGNbZVbOafVu7A6RIGININhHsQ0A_xWhGJDO-JQ07YzwBq4ZjBNxnAc_UP-vAJe4me3kQQo6KSgjE232b57vMOTlhmvM0IRxvprgx-AYBMae7bD9Z8vSmvzBwZGW0-tEZzLy8sLUO6IxyaoLZTAOHqDXGZLVB5PVD58ItYcwUGVHU7Qmt74XN9CB3uF35cMUEVfqlXJJ1rGWWbzZLapOygcB2Gwz4kLmCdBSY8cVJjdLYnQNQJ2sP0mf83kBhUZCSWdMBlPVwXofXtKLU3SHpiYSNsoOg1LXCn6UQ";
 Future<void> main() async {
   runApp(MyApp());
 }
@@ -31,14 +33,15 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     FirebaseChatConfigs.instance.init(
-        usersLink: "Users", roomsLink: "Rooms", myParticipantToken: token);
+        usersLink: "Users", roomsLink: "Rooms", myParticipantToken: fakeToken);
     chatProvider = ChatProvider();
     getLobby();
     super.initState();
   }
 
   getLobby() async {
-    lobby = await chatProvider.getLobby();
+    await chatProvider.init(() => token);
+    lobby = chatProvider.getLobby();
 
     lobby.getLobbyListener().listen((List<Room> lobbyRooms) {
       rooms = lobbyRooms;
