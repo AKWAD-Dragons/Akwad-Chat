@@ -94,8 +94,8 @@ class Room {
     }
     if (roomJson.containsKey("participants")) {
       roomJson['participants'] = roomJson["participants"]
-          .values
-          .map((value) => Map<String, dynamic>.from(value))
+          .keys
+          .map((key) => Map<String, dynamic>.from(roomJson["participants"][key]..id=key))
           .toList();
     }
     Room room = Room.fromJson(roomJson);
