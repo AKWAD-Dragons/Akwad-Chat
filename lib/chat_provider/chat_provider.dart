@@ -30,7 +30,7 @@ class ChatProvider {
         .catchError((ex) async {
       if (ex.code == "invalid-custom-token") {
         print("Token is invalid or expired\nretrying with onTokenExpired");
-        FirebaseChatConfigs.instance.init(myParticipantToken: onTokenExpired());
+        FirebaseChatConfigs.instance.init(myParticipantToken: await onTokenExpired());
         await FirebaseAuth.instance
             .signInWithCustomToken(FirebaseChatConfigs.instance.myParticipantToken)
             .then((value) => creds = value)
