@@ -54,18 +54,19 @@ class Room {
 
   Stream get getRoomListener async* {
     await for (Event event in _dbr.child(roomLink).onValue) {
-      setRoomFromSnapshot(event.snapshot);
+      parseRoomFromSnapshot(event.snapshot);
       yield null;
     }
   }
 
   Future<Room> getRoom() async {
     DataSnapshot snapshot = await _dbr.child(roomLink).once();
-    setRoomFromSnapshot(snapshot);
+    parseRoomFromSnapshot(snapshot);
     return this;
   }
 
-  Room setRoomFromSnapshot(DataSnapshot snapshot) {
+  Room parseRoomFromSnapshot(DataSnapshot snapshot) {
+    if (snapshot == null || snapshot.value == null) return null;
     Map<String, dynamic> roomJson = Map<String, dynamic>.from(snapshot.value);
     if (roomJson.containsKey("messages")) {
       List messagesJsonList;
@@ -93,10 +94,23 @@ class Room {
       roomJson['meta_data'] = Map<String, dynamic>.from(roomJson["meta_data"]);
     }
     if (roomJson.containsKey("participants")) {
-      roomJson['participants'] = roomJson["participants"]
-          .values
-          .map((value) => Map<String, dynamic>.from(value))
-          .toList();
+      roomJson['participants'] = roomJson["participants"].keys.map((key) {
+        Map<String, dynamic> map = Map<String, dynamic>.from(roomJson["participants"][key]);
+        map["id"] = key;
+        return map;
+      }).toList();
+    }
+    if (roomJson.containsKey("last_message")) {
+      var messageMap = Map<String, dynamic>.from(roomJson["last_message"]);
+      if (messageMap.containsKey("attachments")) {
+        List<Map<String, dynamic>> attachments =
+            List<Map<String, dynamic>>.from(messageMap["attachments"]
+                .map((value) => Map<String, dynamic>.from(value))
+                .toList());
+
+        messageMap['attachments'] = attachments;
+      }
+      roomJson["last_message"] = messageMap;
     }
     Room room = Room.fromJson(roomJson);
     this.metaData = room.metaData;
@@ -140,7 +154,7 @@ class Room {
   }
 
   Future<void> setSeen(Message msg, [bool seen = true]) async {
-    if(msg==null){
+    if (msg == null) {
       return;
     }
     await _dbr
