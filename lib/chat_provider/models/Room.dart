@@ -37,9 +37,12 @@ class Room {
       return name;
     }
     String makeName = "";
-    int length = participants.length > 3 ? 3 : participants.length;
-    String endText = participants.length > 3 ? ", ..." : "";
+    int length = participants.length > 4 ? 4 : participants.length;
+    String endText = participants.length > 4 ? ", ..." : "";
     for (int i = 0; i < length; i++) {
+      if(participants[i].id==FirebaseChatConfigs.instance.myParticipantID){
+        continue;
+      }
       makeName += participants[i].name;
       if (i < participants.length - 1) {
         makeName += ', ';
