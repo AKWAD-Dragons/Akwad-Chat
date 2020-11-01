@@ -47,7 +47,7 @@ class Lobby {
 
 
   //TODO::replace function passed in forEach by Parsing function in Room class
-  //parses room from snapshot valud
+  //parses room from snapshot value
   List<Room> _setRoomsFromSnapshot(DataSnapshot snapshot) {
     if (snapshot.value == null) return [];
     List<Room> rooms = [];

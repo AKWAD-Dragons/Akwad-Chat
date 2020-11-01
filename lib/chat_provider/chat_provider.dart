@@ -86,7 +86,7 @@ class ChatProvider {
   }
 
   //TODO::LOGOUT
-  Future<void> logout(){
+  Future<void> deAuth(){
 
   }
 }
