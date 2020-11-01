@@ -32,6 +32,8 @@ class Room {
   Room(this.name, this.image, this.participants, this.messages, this.metaData,
       this.lastMessage);
 
+  //gets room name if it's not null
+  //if null it concatenate participants names using a comma
   String get roomName {
     if (name != null) {
       return name;
@@ -51,26 +53,47 @@ class Room {
     return makeName + endText;
   }
 
+  //current room link in RTDB
   String get roomLink => _configs.roomsLink + "/$id";
 
+  //current room messages link in RTDB
   String get messagesLink => _configs.roomsLink + "/$id/messages";
 
+
+  //listen to Room updates
   Stream get getRoomListener async* {
     await for (Event event in _dbr.child(roomLink).onValue) {
-      parseRoomFromSnapshot(event.snapshot);
+      Room room = parseRoomFromSnapshotValue(event.snapshot?.value()??null);
+      _setThisFromRoom(room);
       yield null;
     }
   }
 
+  //get room data without listening
   Future<Room> getRoom() async {
     DataSnapshot snapshot = await _dbr.child(roomLink).once();
-    parseRoomFromSnapshot(snapshot);
+    Room room = parseRoomFromSnapshotValue(snapshot?.value()??null);
+    _setThisFromRoom(room);
     return this;
   }
 
-  Room parseRoomFromSnapshot(DataSnapshot snapshot) {
-    if (snapshot == null || snapshot.value == null) return null;
-    Map<String, dynamic> roomJson = Map<String, dynamic>.from(snapshot.value);
+
+  //copies room object data into current room
+  _setThisFromRoom(Room room){
+    this.metaData = room.metaData;
+    this.participants = room.participants;
+    this.image = room.image;
+    this.name = room.name;
+    this.messages = room.messages;
+    this.lastMessage=null;
+  }
+
+
+  //TODO::make Lobby use this to parse each single room
+  //parse room using snapshot value
+  Room parseRoomFromSnapshotValue(dynamic snapshotValue) {
+    if (snapshotValue == null) return null;
+    Map<String, dynamic> roomJson = Map<String, dynamic>.from(snapshotValue);
     if (roomJson.containsKey("messages")) {
       List messagesJsonList;
       messagesJsonList = roomJson["messages"].keys.map((key) {
@@ -116,17 +139,15 @@ class Room {
       roomJson["last_message"] = messageMap;
     }
     Room room = Room.fromJson(roomJson);
-    this.metaData = room.metaData;
-    this.participants = room.participants;
-    this.image = room.image;
-    this.name = room.name;
-    this.messages = room.messages;
-    this.lastMessage = null;
     return room;
   }
 
+  //TODO::Allow user to mute a selected room
   Stream<List<Message>> mute() {}
 
+
+  //Sends a message that may contains text and/or attachments
+  //Returns a SendMessageTask that could be used to track attachments upload progress
   SendMessageTask send(Message msg) {
     if (msg.attachments?.isNotEmpty ?? false) {
       SendMessageTask sendMessageTask =
@@ -143,6 +164,8 @@ class Room {
     return SendMessageTask._({"send_task": _SingleUploadTask._(null, null)});
   }
 
+  //assign each attachment to a SingleUploadTask
+  //returns a map of {attachment_key:_SingleUploadTask}
   Map<String, _SingleUploadTask> _createUploadAttachmentsTasks(
       List<ChatAttachment> attachments) {
     Map<String, _SingleUploadTask> uploadTasks = {};
@@ -150,12 +173,15 @@ class Room {
       String path = "$id/${DateTime.now().millisecondsSinceEpoch}";
       _SingleUploadTask singleTask = _SingleUploadTask._(attachment, path);
 
+      //gives current timestamp as a key if no key passed to attachment
       uploadTasks[attachment.key ?? DateTime.now().millisecondsSinceEpoch] =
           singleTask;
     });
     return uploadTasks;
   }
 
+  //TODO::[OPTIMIZATION]check if room last seen is the same as the package and ignore sending seen again
+  //sets message as seen
   Future<void> setSeen(Message msg, [bool seen = true]) async {
     if (msg == null) {
       return;

@@ -4,6 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'ChatAttachment.g.dart';
 
+//Chat Attachment contains uploaded attachment details
 @JsonSerializable()
 class ChatAttachment{
   @JsonKey(ignore: true)

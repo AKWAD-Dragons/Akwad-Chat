@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'Participant.g.dart';
 
+//Chat Participant data
 @JsonSerializable()
 class Participant {
   String id;

@@ -1,3 +1,4 @@
+//Firebase Configs for ChatProvider
 class FirebaseChatConfigs {
   String _roomsLink;
   String _usersLink;
@@ -30,6 +31,8 @@ class FirebaseChatConfigs {
     _checkNull(_myParticipantToken, "myParticipantToken");
     return _myParticipantToken;
   }
+
+  //User ID in Realtime DB
   String get myParticipantID {
     _checkNull(_myParticipantID, "myParticipantID");
     return _myParticipantID;
@@ -41,8 +44,18 @@ class FirebaseChatConfigs {
 
   bool get isInit=>_isInit;
 
-
-
+  //Example Scheme
+  //firebase-project-root:
+  //  Rooms:
+  //    -Mw91AWdawdaWDew3
+  //  Users:
+  //    -Mw31sfWdafa2Dewa
+  //roomLink: link to Rooms node in realtime database
+  //  for the example scheme that would be roomLink:"Rooms"
+  //userLink: link to Users node in realtime database
+  //  for the example scheme that would be roomLink:"Users"
+  //myParticipantToken: a custom token that expires after one hour
+  //  this token could be fetched through the cloud function createUser and refreshToken
   void init({String roomsLink, String usersLink, String myParticipantToken}) {
     _isInit = true;
     _roomsLink = roomsLink ?? _roomsLink;

@@ -5,6 +5,11 @@ import '../FirebaseChatConfigs.dart';
 import 'Participant.dart';
 import 'Room.dart';
 
+
+//Lobby contains User Rooms(without messages essentially only contains last_message)
+//and listen to it's updates
+//the use case in mind was to use it to view Room details in a list of rooms
+
 class Lobby {
   FirebaseChatConfigs _configs;
   DatabaseReference _dbr;
@@ -17,27 +22,33 @@ class Lobby {
     _dbr = FirebaseDatabase.instance.reference();
   }
 
+  //listen to lobby rooms updates(last_message, new participants, etc)
   Stream<List<Room>> getLobbyListener() {
     _dbr
         .child(_configs.usersLink + "/" + _configs.myParticipantID + "/rooms")
         .onValue
         .listen((event) {
-      rooms = setRoomsFromSnapshot(event.snapshot);
+      rooms = _setRoomsFromSnapshot(event.snapshot);
       _roomsSubject.add(rooms);
     });
     return _roomsSubject;
   }
 
+
+  //get rooms without listening to them
   Future<List<Room>> getAllRooms() async {
     DataSnapshot snapshot = await _dbr
         .child(_configs.usersLink + "/" + _configs.myParticipantID + "/rooms")
         .once();
-    setRoomsFromSnapshot(snapshot);
+    _setRoomsFromSnapshot(snapshot);
     _roomsSubject.add(rooms);
     return rooms;
   }
 
-  List<Room> setRoomsFromSnapshot(DataSnapshot snapshot) {
+
+  //TODO::replace function passed in forEach by Parsing function in Room class
+  //parses room from snapshot valud
+  List<Room> _setRoomsFromSnapshot(DataSnapshot snapshot) {
     if (snapshot.value == null) return [];
     List<Room> rooms = [];
     snapshot.value.values.forEach((valueMap) {
@@ -67,6 +78,7 @@ class Lobby {
     return rooms;
   }
 
+  //gets current participant data from RealTime DB
   void initParticipant() async {
     DataSnapshot dataSnapshot = await _dbr
         .child(_configs.usersLink + "/" + _configs.myParticipantID)
