@@ -40,11 +40,11 @@ class ChatProvider {
     if (FirebaseAuth.instance.currentUser != null) {
       FirebaseChatConfigs.instance.myParticipantID =
           FirebaseAuth.instance.currentUser.uid;
+      //SKIP Authorization
     }
     UserCredential creds;
-    await FirebaseAuth.instance
+    creds = await FirebaseAuth.instance
         .signInWithCustomToken(FirebaseChatConfigs.instance.myParticipantToken)
-        .then((value) => creds = value)
         .catchError((ex) async {
       if (ex.code == "invalid-custom-token") {
         print("Token is invalid or expired\nretrying with onTokenExpired");

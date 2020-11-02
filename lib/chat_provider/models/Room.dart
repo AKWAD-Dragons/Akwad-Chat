@@ -138,6 +138,8 @@ class Room {
       }
       roomJson["last_message"] = messageMap;
     }
+    //TODO::if room doesn't conatain last_message but contains messages
+    //TODO::set last_message to be messages.last
     Room room = Room.fromJson(roomJson);
     return room;
   }
