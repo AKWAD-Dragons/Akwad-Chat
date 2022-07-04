@@ -53,13 +53,12 @@ class ChatProvider {
         await FirebaseAuth.instance
             .signInWithCustomToken(
                 FirebaseChatConfigs.instance.myParticipantToken)
-            .then((value) => creds = value)
+            .then((value) => FirebaseChatConfigs.instance.myParticipantID = value.user.uid)
             .catchError((e) => throw e);
         return;
       }
       throw ex;
     });
-    FirebaseChatConfigs.instance.myParticipantID = creds.user.uid;
     await subscribeToNotifications();
     _isInit = true;
   }
