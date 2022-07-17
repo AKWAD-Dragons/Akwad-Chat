@@ -1,15 +1,16 @@
+import 'dart:async';
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:json_annotation/json_annotation.dart';
+
 import '../FirebaseChatConfigs.dart';
 import 'ChatAttachment.dart';
 import 'Message.dart';
 import 'Participant.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'dart:async';
-
-part 'Room.g.dart';
 
 part '../SendTask.dart';
+part 'Room.g.dart';
 
 @JsonSerializable()
 class Room {
@@ -42,7 +43,7 @@ class Room {
     int length = participants.length > 4 ? 4 : participants.length;
     String endText = participants.length > 4 ? ", ..." : "";
     for (int i = 0; i < length; i++) {
-      if(participants[i].id==FirebaseChatConfigs.instance.myParticipantID){
+      if (participants[i].id == FirebaseChatConfigs.instance.myParticipantID) {
         continue;
       }
       makeName += participants[i].name;
@@ -59,11 +60,10 @@ class Room {
   //current room messages link in RTDB
   String get messagesLink => _configs.roomsLink + "/$id/messages";
 
-
   //listen to Room updates
   Stream get getRoomListener async* {
     await for (Event event in _dbr.child(roomLink).onValue) {
-      Room room = parseRoomFromSnapshotValue(event.snapshot?.value()??null);
+      Room room = parseRoomFromSnapshotValue(event.snapshot?.value ?? null);
       _setThisFromRoom(room);
       yield null;
     }
@@ -72,22 +72,20 @@ class Room {
   //get room data without listening
   Future<Room> getRoom() async {
     DataSnapshot snapshot = await _dbr.child(roomLink).once();
-    Room room = parseRoomFromSnapshotValue(snapshot?.value()??null);
+    Room room = parseRoomFromSnapshotValue(snapshot?.value ?? null);
     _setThisFromRoom(room);
     return this;
   }
 
-
   //copies room object data into current room
-  _setThisFromRoom(Room room){
+  _setThisFromRoom(Room room) {
     this.metaData = room.metaData;
     this.participants = room.participants;
     this.image = room.image;
     this.name = room.name;
     this.messages = room.messages;
-    this.lastMessage=null;
+    this.lastMessage = null;
   }
-
 
   //TODO::make Lobby use this to parse each single room
   //parse room using snapshot value
@@ -121,7 +119,8 @@ class Room {
     }
     if (roomJson.containsKey("participants")) {
       roomJson['participants'] = roomJson["participants"].keys.map((key) {
-        Map<String, dynamic> map = Map<String, dynamic>.from(roomJson["participants"][key]);
+        Map<String, dynamic> map =
+            Map<String, dynamic>.from(roomJson["participants"][key]);
         map["id"] = key;
         return map;
       }).toList();
@@ -146,7 +145,6 @@ class Room {
 
   //TODO::Allow user to mute a selected room
   Stream<List<Message>> mute() {}
-
 
   //Sends a message that may contains text and/or attachments
   //Returns a SendMessageTask that could be used to track attachments upload progress
