@@ -46,18 +46,15 @@ class ChatProvider {
     creds = await FirebaseAuth.instance
         .signInWithCustomToken(FirebaseChatConfigs.instance.myParticipantToken)
         .catchError((ex) async {
-      if (ex.code == "invalid-custom-token") {
-        print("Token is invalid or expired\nretrying with onTokenExpired");
-        FirebaseChatConfigs.instance
-            .init(myParticipantToken: await onTokenExpired());
-        await FirebaseAuth.instance
-            .signInWithCustomToken(
-                FirebaseChatConfigs.instance.myParticipantToken)
-            .then((value) => FirebaseChatConfigs.instance.myParticipantID = value.user.uid)
-            .catchError((e) => throw e);
-        return;
-      }
-      throw ex;
+      print("Token is invalid or expired\nretrying with onTokenExpired");
+      FirebaseChatConfigs.instance
+          .init(myParticipantToken: await onTokenExpired());
+      await FirebaseAuth.instance
+          .signInWithCustomToken(
+              FirebaseChatConfigs.instance.myParticipantToken)
+          .then((value) =>
+              FirebaseChatConfigs.instance.myParticipantID = value.user.uid)
+          .catchError((e) => throw e);
     });
     await subscribeToNotifications();
     _isInit = true;
@@ -85,9 +82,7 @@ class ChatProvider {
   }
 
   //TODO::LOGOUT
-  Future<void> deAuth(){
-
-  }
+  Future<void> deAuth() {}
 }
 
 class AttachmentTypes {
