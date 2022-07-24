@@ -191,6 +191,28 @@ class Room {
         .update({'last_seen_message': msg.id});
   }
 
+  //gets room participants and check last seen message of each participant
+  //message is not seen if other participants lastSeenMessage is null or less than message id (using String compare)
+  // throws Exception if msg is null
+  bool isSeen(Message msg) {
+    if (msg == null) {
+      throw Exception("Message is null");
+    }
+    bool isSeen = true;
+    for (Participant participant in participants) {
+      if (participant.id == _configs.myParticipantID) continue;
+      if (participant.lastSeenMessage == null) {
+        isSeen = false;
+        break;
+      }
+      if ((participant.lastSeenMessage).compareTo(msg.id) < 0) {
+        isSeen = false;
+        break;
+      }
+    }
+    return isSeen;
+  }
+
   factory Room.fromJson(Map<String, dynamic> json) => _$RoomFromJson(json);
 
   Map<String, dynamic> toJson() => _$RoomToJson(this);
