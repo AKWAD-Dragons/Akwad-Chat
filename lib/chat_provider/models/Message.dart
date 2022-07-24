@@ -4,21 +4,21 @@ import 'ChatAttachment.dart';
 
 part 'Message.g.dart';
 
-
 //Message Data
 @JsonSerializable(explicitToJson: true)
 class Message {
   String id;
   String text;
   String user_id;
-  @JsonKey(fromJson:dateFromMilliSec)
+  @JsonKey(fromJson: dateFromMilliSec)
   DateTime time;
   List<ChatAttachment> attachments;
+  bool isDelivered = false;
 
-  Message({this.text,this.attachments});
+  Message({this.text, this.attachments});
 
   //parses timestamp(long) to (DateTime)
-  static dateFromMilliSec (val){
+  static dateFromMilliSec(val) {
     return DateTime.fromMillisecondsSinceEpoch(val);
   }
 

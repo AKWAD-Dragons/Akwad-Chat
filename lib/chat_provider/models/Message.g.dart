@@ -17,7 +17,8 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
   )
     ..id = json['id'] as String
     ..user_id = json['user_id'] as String
-    ..time = Message.dateFromMilliSec(json['time']);
+    ..time = Message.dateFromMilliSec(json['time'])
+    ..isDelivered = json['delivered'] as bool;
 }
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{

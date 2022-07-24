@@ -13,7 +13,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: d4099863ec1c8dc6bff58c78499952acf0217c7b
+      resolved-ref: "8c05d67b8ec041113e10d1b80c53275215ef6b30"
       url: "https://github.com/AKWAD-Dragons/Akwad-Chat.git"
     source: git
     version: "0.0.1"
