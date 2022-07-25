@@ -30,6 +30,9 @@ class Room {
   @JsonKey(ignore: true)
   FirebaseChatConfigs _configs = FirebaseChatConfigs.instance;
 
+  @JsonKey(ignore: true)
+  Map<String, dynamic> _userRoomData;
+
   Room(this.name, this.image, this.participants, this.messages, this.metaData,
       this.lastMessage);
 
@@ -62,6 +65,7 @@ class Room {
 
   //listen to Room updates
   Stream get getRoomListener async* {
+    await _setUserRoomData();
     await for (Event event in _dbr.child(roomLink).onValue) {
       Room room = parseRoomFromSnapshotValue(event.snapshot?.value ?? null);
       _setThisFromRoom(room);
@@ -72,9 +76,20 @@ class Room {
   //get room data without listening
   Future<Room> getRoom() async {
     DataSnapshot snapshot = await _dbr.child(roomLink).once();
+    await _setUserRoomData();
     Room room = parseRoomFromSnapshotValue(snapshot?.value ?? null);
     _setThisFromRoom(room);
     return this;
+  }
+
+  Future<void> _setUserRoomData([bool force = false]) async {
+    if (_userRoomData != null && !force) return;
+    DataSnapshot snapshot = await _dbr
+        .child(_configs.usersLink + "/" + _configs.myParticipantID + "/rooms")
+        .child(id)
+        .child('/data')
+        .once();
+    _userRoomData = snapshot?.value ?? {};
   }
 
   //copies room object data into current room
@@ -93,25 +108,8 @@ class Room {
     if (snapshotValue == null) return null;
     Map<String, dynamic> roomJson = Map<String, dynamic>.from(snapshotValue);
     if (roomJson.containsKey("messages")) {
-      List messagesJsonList;
-      messagesJsonList = roomJson["messages"].keys.map((key) {
-        var messageMap = Map<String, dynamic>.from(roomJson["messages"][key]);
-        if (messageMap.containsKey("attachments")) {
-          List<Map<String, dynamic>> attachments =
-              List<Map<String, dynamic>>.from(messageMap["attachments"]
-                  .map((value) => Map<String, dynamic>.from(value))
-                  .toList());
-
-          messageMap['attachments'] = attachments;
-        }
-        messageMap['id'] = key;
-        return messageMap;
-      }).toList();
-
-      messagesJsonList.sort((a, b) {
-        return a['id'].compareTo(b['id']);
-      });
-
+      //get current user room data
+      List messagesJsonList = _buildMessagesJsonFromRoomJson(roomJson);
       roomJson['messages'] = messagesJsonList;
     }
     if (roomJson.containsKey("meta_data")) {
@@ -128,19 +126,46 @@ class Room {
     if (roomJson.containsKey("last_message")) {
       var messageMap = Map<String, dynamic>.from(roomJson["last_message"]);
       if (messageMap.containsKey("attachments")) {
-        List<Map<String, dynamic>> attachments =
-            List<Map<String, dynamic>>.from(messageMap["attachments"]
-                .map((value) => Map<String, dynamic>.from(value))
-                .toList());
-
-        messageMap['attachments'] = attachments;
+        messageMap['attachments'] = _buildMessageAttachmentJson(messageMap);
       }
       roomJson["last_message"] = messageMap;
     }
-    //TODO::if room doesn't conatain last_message but contains messages
-    //TODO::set last_message to be messages.last
+    //TODO::if room doesn't contain last_message but contains messages set last_message to be messages.last
     Room room = Room.fromJson(roomJson);
     return room;
+  }
+
+  List _buildMessagesJsonFromRoomJson(Map<String, dynamic> roomJson) {
+    String deletedTo;
+    if (_userRoomData.containsKey("deleted_to")) {
+      deletedTo = _userRoomData["deleted_to"];
+    }
+    List messagesJsonList = [];
+    for (String key in roomJson["messages"].keys) {
+      if (deletedTo != null && key.compareTo(deletedTo) <= 0) {
+        continue;
+      }
+      Map<String, dynamic> messageJson =
+          Map<String, dynamic>.from(roomJson["messages"][key]);
+      if (messageJson.containsKey("attachments")) {
+        messageJson['attachments'] = _buildMessageAttachmentJson(messageJson);
+      }
+      messageJson['id'] = key;
+      messagesJsonList.add(messageJson);
+    }
+
+    messagesJsonList.sort((a, b) {
+      return a['id'].compareTo(b['id']);
+    });
+
+    return messagesJsonList;
+  }
+
+  List<Map<String, dynamic>> _buildMessageAttachmentJson(
+      Map<String, dynamic> messageMap) {
+    return List<Map<String, dynamic>>.from(messageMap["attachments"]
+        .map((value) => Map<String, dynamic>.from(value))
+        .toList());
   }
 
   //TODO::Allow user to mute a selected room
@@ -178,6 +203,17 @@ class Room {
           singleTask;
     });
     return uploadTasks;
+  }
+
+  Future<void> deleteAllMessages() async {
+    Message lastMessage = this.messages?.last ?? null;
+    if (lastMessage == null) return;
+    await _dbr
+        .child(_configs.usersLink + "/" + _configs.myParticipantID + "/rooms")
+        .child(id)
+        .child('/data')
+        .update({'deleted_to': lastMessage.id});
+    _setUserRoomData(true);
   }
 
   //TODO::[OPTIMIZATION]check if room last seen is the same as the package and ignore sending seen again
