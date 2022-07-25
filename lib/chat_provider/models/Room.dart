@@ -89,7 +89,7 @@ class Room {
         .child(id)
         .child('/data')
         .once();
-    _userRoomData = snapshot?.value ?? {};
+    _userRoomData = Map.from(snapshot?.value ?? {});
   }
 
   //copies room object data into current room
@@ -118,7 +118,7 @@ class Room {
     if (roomJson.containsKey("participants")) {
       roomJson['participants'] = roomJson["participants"].keys.map((key) {
         Map<String, dynamic> map =
-            Map<String, dynamic>.from(roomJson["participants"][key]);
+        Map<String, dynamic>.from(roomJson["participants"][key]);
         map["id"] = key;
         return map;
       }).toList();
@@ -146,7 +146,7 @@ class Room {
         continue;
       }
       Map<String, dynamic> messageJson =
-          Map<String, dynamic>.from(roomJson["messages"][key]);
+      Map<String, dynamic>.from(roomJson["messages"][key]);
       if (messageJson.containsKey("attachments")) {
         messageJson['attachments'] = _buildMessageAttachmentJson(messageJson);
       }
@@ -176,7 +176,7 @@ class Room {
   SendMessageTask send(Message msg) {
     if (msg.attachments?.isNotEmpty ?? false) {
       SendMessageTask sendMessageTask =
-          SendMessageTask._(_createUploadAttachmentsTasks(msg.attachments));
+      SendMessageTask._(_createUploadAttachmentsTasks(msg.attachments));
       sendMessageTask
           .addOnCompleteListener((List<ChatAttachment> uploadedAttachments) {
         msg.attachments = uploadedAttachments;
@@ -206,7 +206,7 @@ class Room {
   }
 
   Future<void> deleteAllMessages() async {
-    Message lastMessage = this.messages?.last ?? null;
+    Message lastMessage = this.messages.length>0 ? this.messages[this.messages.length-1]:null;
     if (lastMessage == null) return;
     await _dbr
         .child(_configs.usersLink + "/" + _configs.myParticipantID + "/rooms")
