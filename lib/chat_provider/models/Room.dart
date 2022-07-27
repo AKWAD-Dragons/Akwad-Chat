@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -20,7 +21,7 @@ class Room {
   List<Participant> participants;
   List<Message> messages;
   @JsonKey(name: "meta_data")
-  Map<String, dynamic> metaData;
+  LinkedHashMap<String, dynamic> metaData;
   @JsonKey(name: "last_message")
   Message lastMessage;
 
@@ -31,10 +32,12 @@ class Room {
   FirebaseChatConfigs _configs = FirebaseChatConfigs.instance;
 
   @JsonKey(ignore: true)
-  Map<String, dynamic> _userRoomData;
+  LinkedHashMap<String, dynamic> userRoomData;
+  @JsonKey(ignore: true)
+  bool _ignoredFirstMessagesOnValue = false;
 
   Room(this.name, this.image, this.participants, this.messages, this.metaData,
-      this.lastMessage);
+      this.userRoomData, this.lastMessage);
 
   //gets room name if it's not null
   //if null it concatenate participants names using a comma
@@ -61,7 +64,7 @@ class Room {
   String get roomLink => _configs.roomsLink + "/$id";
 
   //current room messages link in RTDB
-  String get messagesLink => _configs.roomsLink + "/$id/messages";
+  String get messagesLink => _configs.messagesLink + "/$id";
 
   //listen to Room updates
   Stream get getRoomListener async* {
@@ -83,13 +86,13 @@ class Room {
   }
 
   Future<void> _setUserRoomData([bool force = false]) async {
-    if (_userRoomData != null && !force) return;
+    if (userRoomData != null && !force) return;
     DataSnapshot snapshot = await _dbr
         .child(_configs.usersLink + "/" + _configs.myParticipantID + "/rooms")
         .child(id)
         .child('/data')
         .once();
-    _userRoomData = Map.from(snapshot?.value ?? {});
+    userRoomData = Map<String, dynamic>.from(snapshot?.value ?? {});
   }
 
   //copies room object data into current room
@@ -102,69 +105,98 @@ class Room {
     this.lastMessage = null;
   }
 
+  Future<List<Message>> getMessages() async {
+    await _setUserRoomData();
+    DataSnapshot snapshot = await _dbr.child(messagesLink).once();
+    List<Message> messages = _parseMessagesFromSnapshotValue(snapshot.value);
+    return messages;
+  }
+
+  //get messages listener
+  Stream<Message> get getMessagesListener async* {
+    await _setUserRoomData();
+    await for (Event event in _dbr.child(messagesLink).onValue) {
+      if (!_ignoredFirstMessagesOnValue) {
+        _ignoredFirstMessagesOnValue = true;
+        continue;
+      }
+      List<Message> messages =
+          _parseMessagesFromSnapshotValue(event.snapshot?.value ?? null);
+      lastMessage = messages.last;
+      yield lastMessage;
+    }
+  }
+
   //TODO::make Lobby use this to parse each single room
   //parse room using snapshot value
   Room parseRoomFromSnapshotValue(dynamic snapshotValue) {
     if (snapshotValue == null) return null;
-    Map<String, dynamic> roomJson = Map<String, dynamic>.from(snapshotValue);
-    if (roomJson.containsKey("messages")) {
-      //get current user room data
-      List messagesJsonList = _buildMessagesJsonFromRoomJson(roomJson);
-      roomJson['messages'] = messagesJsonList;
-    }
+    LinkedHashMap<String, dynamic> roomJson =
+        LinkedHashMap<String, dynamic>.from(snapshotValue);
     if (roomJson.containsKey("meta_data")) {
-      roomJson['meta_data'] = Map<String, dynamic>.from(roomJson["meta_data"]);
+      roomJson['meta_data'] =
+          LinkedHashMap<String, dynamic>.from(roomJson["meta_data"]);
     }
     if (roomJson.containsKey("participants")) {
       roomJson['participants'] = roomJson["participants"].keys.map((key) {
-        Map<String, dynamic> map =
-        Map<String, dynamic>.from(roomJson["participants"][key]);
+        LinkedHashMap<String, dynamic> map =
+            LinkedHashMap<String, dynamic>.from(roomJson["participants"][key]);
         map["id"] = key;
         return map;
       }).toList();
     }
     if (roomJson.containsKey("last_message")) {
-      var messageMap = Map<String, dynamic>.from(roomJson["last_message"]);
+      var messageMap =
+          LinkedHashMap<String, dynamic>.from(roomJson["last_message"]);
       if (messageMap.containsKey("attachments")) {
         messageMap['attachments'] = _buildMessageAttachmentJson(messageMap);
       }
       roomJson["last_message"] = messageMap;
     }
-    //TODO::if room doesn't contain last_message but contains messages set last_message to be messages.last
     Room room = Room.fromJson(roomJson);
     return room;
   }
 
-  List _buildMessagesJsonFromRoomJson(Map<String, dynamic> roomJson) {
-    String deletedTo;
-    if (_userRoomData.containsKey("deleted_to")) {
-      deletedTo = _userRoomData["deleted_to"];
+  List<Message> _parseMessagesFromSnapshotValue(dynamic snapShotValue) {
+    if (snapShotValue == null) {
+      return [];
     }
-    List messagesJsonList = [];
-    for (String key in roomJson["messages"].keys) {
+    String deletedTo;
+    if (userRoomData.containsKey("deleted_to")) {
+      deletedTo = userRoomData["deleted_to"];
+    }
+    List<Message> messageList = [];
+    for (String key in snapShotValue.keys) {
       if (deletedTo != null && key.compareTo(deletedTo) <= 0) {
         continue;
       }
-      Map<String, dynamic> messageJson =
-      Map<String, dynamic>.from(roomJson["messages"][key]);
-      if (messageJson.containsKey("attachments")) {
-        messageJson['attachments'] = _buildMessageAttachmentJson(messageJson);
+      if (snapShotValue[key].containsKey("attachments")) {
+        snapShotValue[key]['attachments'] =
+            _buildMessageAttachmentJson(snapShotValue[key]);
       }
-      messageJson['id'] = key;
-      messagesJsonList.add(messageJson);
+      snapShotValue[key]['id'] = key;
+      Message message = _parseMessageFromSnapshotValue(snapShotValue[key]);
+      messageList.add(message);
     }
-
-    messagesJsonList.sort((a, b) {
-      return a['id'].compareTo(b['id']);
-    });
-
-    return messagesJsonList;
+    //sort messages by id
+    messageList.sort((a, b) => a.id.compareTo(b.id));
+    return messageList;
   }
 
-  List<Map<String, dynamic>> _buildMessageAttachmentJson(
-      Map<String, dynamic> messageMap) {
-    return List<Map<String, dynamic>>.from(messageMap["attachments"]
-        .map((value) => Map<String, dynamic>.from(value))
+  Message _parseMessageFromSnapshotValue(dynamic snapShotValue) {
+    if (snapShotValue == null) return null;
+    if (snapShotValue.containsKey("attachments")) {
+      snapShotValue['attachments'] = _buildMessageAttachmentJson(snapShotValue);
+    }
+    Message message =
+        Message.fromJson(LinkedHashMap<String, dynamic>.from(snapShotValue));
+    return message;
+  }
+
+  List<LinkedHashMap<String, dynamic>> _buildMessageAttachmentJson(
+      dynamic messageMap) {
+    return List<LinkedHashMap<String, dynamic>>.from(messageMap["attachments"]
+        .map((value) => LinkedHashMap<String, dynamic>.from(value))
         .toList());
   }
 
@@ -176,7 +208,7 @@ class Room {
   SendMessageTask send(Message msg) {
     if (msg.attachments?.isNotEmpty ?? false) {
       SendMessageTask sendMessageTask =
-      SendMessageTask._(_createUploadAttachmentsTasks(msg.attachments));
+          SendMessageTask._(_createUploadAttachmentsTasks(msg.attachments));
       sendMessageTask
           .addOnCompleteListener((List<ChatAttachment> uploadedAttachments) {
         msg.attachments = uploadedAttachments;
@@ -205,15 +237,15 @@ class Room {
     return uploadTasks;
   }
 
-  Future<void> deleteAllMessages() async {
-    Message lastMessage = this.messages.length>0 ? this.messages[this.messages.length-1]:null;
-    if (lastMessage == null) return;
-    await _dbr
+  bool deleteAllMessages() {
+    if (lastMessage == null) return false;
+    _dbr
         .child(_configs.usersLink + "/" + _configs.myParticipantID + "/rooms")
         .child(id)
         .child('/data')
-        .update({'deleted_to': lastMessage.id});
-    _setUserRoomData(true);
+        .update({'deleted_to': lastMessage.id}).then(
+            (value) => _setUserRoomData(true));
+    return true;
   }
 
   //TODO::[OPTIMIZATION]check if room last seen is the same as the package and ignore sending seen again
@@ -225,6 +257,11 @@ class Room {
     await _dbr
         .child(roomLink + "/participants/${_configs.myParticipantID}")
         .update({'last_seen_message': msg.id});
+    await _dbr
+        .child(
+            _configs.usersLink + "/${_configs.myParticipantID}/rooms/$id/data")
+        .update({'last_seen_message': msg.id});
+    _setUserRoomData(true);
   }
 
   //gets room participants and check last seen message of each participant
@@ -249,7 +286,8 @@ class Room {
     return isSeen;
   }
 
-  factory Room.fromJson(Map<String, dynamic> json) => _$RoomFromJson(json);
+  factory Room.fromJson(LinkedHashMap<String, dynamic> json) =>
+      _$RoomFromJson(json);
 
-  Map<String, dynamic> toJson() => _$RoomToJson(this);
+  LinkedHashMap<String, dynamic> toJson() => _$RoomToJson(this);
 }

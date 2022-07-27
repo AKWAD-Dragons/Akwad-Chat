@@ -1,6 +1,7 @@
 //Firebase Configs for ChatProvider
 class FirebaseChatConfigs {
   String _roomsLink;
+  String _messagesLink;
   String _usersLink;
   String _myParticipantToken;
   String _myParticipantID;
@@ -8,8 +9,8 @@ class FirebaseChatConfigs {
 
   static FirebaseChatConfigs _instance;
 
-  static FirebaseChatConfigs get instance{
-    if(_instance == null){
+  static FirebaseChatConfigs get instance {
+    if (_instance == null) {
       _instance = FirebaseChatConfigs._();
     }
     return _instance;
@@ -20,6 +21,11 @@ class FirebaseChatConfigs {
   String get roomsLink {
     _checkNull(_roomsLink, "roomLink");
     return _roomsLink;
+  }
+
+  String get messagesLink {
+    _checkNull(_messagesLink, "messagesLink");
+    return _messagesLink;
   }
 
   String get usersLink {
@@ -42,7 +48,7 @@ class FirebaseChatConfigs {
     _myParticipantID = myParticipantID;
   }
 
-  bool get isInit=>_isInit;
+  bool get isInit => _isInit;
 
   //Example Scheme
   //firebase-project-root:
@@ -50,15 +56,25 @@ class FirebaseChatConfigs {
   //    -Mw91AWdawdaWDew3
   //  Users:
   //    -Mw31sfWdafa2Dewa
-  //roomLink: link to Rooms node in realtime database
+  //  Messages:
+  //    -RoomKey/
+  //      -Message1...
+  //roomsLink: link to Rooms node in realtime database
   //  for the example scheme that would be roomLink:"Rooms"
-  //userLink: link to Users node in realtime database
+  //messagesLink: link to Messages node in realtime database
+  //  for the example scheme that would be messageLink:"Messages"
+  //usersLink: link to Users node in realtime database
   //  for the example scheme that would be roomLink:"Users"
   //myParticipantToken: a custom token that expires after one hour
   //  this token could be fetched through the cloud function createUser and refreshToken
-  void init({String roomsLink, String usersLink, String myParticipantToken}) {
+  void init(
+      {String roomsLink = "Rooms",
+      String messagesLink = "Messages",
+      String usersLink = "Users",
+      String myParticipantToken}) {
     _isInit = true;
     _roomsLink = roomsLink ?? _roomsLink;
+    _messagesLink = messagesLink ?? _messagesLink;
     _usersLink = usersLink ?? _usersLink;
     _myParticipantToken = myParticipantToken ?? _myParticipantToken;
   }

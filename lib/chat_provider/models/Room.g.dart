@@ -19,6 +19,7 @@ Room _$RoomFromJson(Map<String, dynamic> json) {
             e == null ? null : Message.fromJson(e as Map<String, dynamic>))
         ?.toList(),
     json['meta_data'] as Map<String, dynamic>,
+    json['data'] as Map<String, dynamic>,
     json['last_message'] == null
         ? null
         : Message.fromJson(json['last_message'] as Map<String, dynamic>),
