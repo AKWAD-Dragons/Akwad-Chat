@@ -44,7 +44,8 @@ class Lobby {
 
           bool isDeleted = false;
           if (room.lastMessage != null &&
-              _userRoomConfigs.containsKey(room.id)) {
+              _userRoomConfigs.containsKey(room.id) &&
+              _userRoomConfigs[room.id].containsKey("deleted_to")) {
             isDeleted = room.lastMessage.id
                     .compareTo(_userRoomConfigs[room.id]['deleted_to']) <=
                 0;
