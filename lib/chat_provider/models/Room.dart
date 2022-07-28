@@ -273,7 +273,7 @@ class Room {
     }
     bool isSeen = true;
     for (Participant participant in participants) {
-      if (participant.id == _configs.myParticipantID) continue;
+      if (participant.id == msg.user_id) continue;
       if (participant.lastSeenMessage == null) {
         isSeen = false;
         break;
