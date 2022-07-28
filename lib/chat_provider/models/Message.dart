@@ -14,6 +14,7 @@ class Message {
   DateTime time;
   List<ChatAttachment> attachments;
   bool isDelivered = false;
+  int index;
 
   Message({this.text, this.attachments});
 

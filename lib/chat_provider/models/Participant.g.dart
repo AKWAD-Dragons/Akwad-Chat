@@ -13,6 +13,7 @@ Participant _$ParticipantFromJson(Map<String, dynamic> json) {
     (json['permissions'] as List)?.map((e) => e as String)?.toList(),
   )
     ..lastSeenMessage = json['last_seen_message'] as String
+    ..lastSeenMessageIndex = json['last_seen_message_index'] as int
     ..meta_data = json['meta_data']
     ..rooms = (json['rooms'] as List)?.map((e) => e as String)?.toList();
 }

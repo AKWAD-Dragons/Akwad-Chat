@@ -60,6 +60,20 @@ class Lobby {
     return _roomsSubject;
   }
 
+  //get unread rooms count
+  Future<int> getUnreadRoomsCount() async {
+    int unreadRoomsCount = 0;
+    if (rooms == null) {
+      rooms = await getAllRooms();
+    }
+    rooms.forEach((Room room) {
+      if (room.unreadMessagesCount > 0) {
+        unreadRoomsCount++;
+      }
+    });
+    return unreadRoomsCount;
+  }
+
   //get lobby rooms
   Future<List<Room>> getLobbyRooms() async {
     DataSnapshot snapshot = await _dbr

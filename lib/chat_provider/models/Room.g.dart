@@ -23,6 +23,7 @@ Room _$RoomFromJson(Map<String, dynamic> json) {
     json['last_message'] == null
         ? null
         : Message.fromJson(json['last_message'] as Map<String, dynamic>),
+    json['last_message_index'] as int,
   )..id = json['id'] as String;
 }
 

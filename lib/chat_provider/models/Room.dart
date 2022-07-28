@@ -24,6 +24,8 @@ class Room {
   LinkedHashMap<String, dynamic> metaData;
   @JsonKey(name: "last_message")
   Message lastMessage;
+  @JsonKey(name: "last_message_index")
+  int lastMessageIndex;
 
   @JsonKey(ignore: true)
   DatabaseReference _dbr = FirebaseDatabase.instance.reference();
@@ -37,7 +39,7 @@ class Room {
   bool _ignoredFirstMessagesOnValue = false;
 
   Room(this.name, this.image, this.participants, this.messages, this.metaData,
-      this.userRoomData, this.lastMessage);
+      this.userRoomData, this.lastMessage, this.lastMessageIndex);
 
   //gets room name if it's not null
   //if null it concatenate participants names using a comma
@@ -85,6 +87,16 @@ class Room {
     return this;
   }
 
+  //get unread messages count
+  int get unreadMessagesCount {
+    Participant myParticipant = participants.firstWhere(
+        (p) => p.id == FirebaseChatConfigs.instance.myParticipantID);
+    if (myParticipant == null) {
+      return 0;
+    }
+    return (lastMessageIndex ?? 0) - (myParticipant.lastSeenMessageIndex ?? 0);
+  }
+
   Future<void> _setUserRoomData([bool force = false]) async {
     if (userRoomData != null && !force) return;
     DataSnapshot snapshot = await _dbr
@@ -101,8 +113,8 @@ class Room {
     this.participants = room.participants;
     this.image = room.image;
     this.name = room.name;
-    this.messages = room.messages;
-    this.lastMessage = null;
+    this.lastMessage = room.lastMessage;
+    this.lastMessageIndex = room.lastMessageIndex;
   }
 
   Future<List<Message>> getMessages() async {
@@ -250,17 +262,25 @@ class Room {
 
   //TODO::[OPTIMIZATION]check if room last seen is the same as the package and ignore sending seen again
   //sets message as seen
-  Future<void> setSeen(Message msg, [bool seen = true]) async {
-    if (msg == null) {
+  Future<void> markAsRead() async {
+    if (lastMessage == null ||
+        lastMessage.id == null ||
+        lastMessageIndex == null) {
       return;
     }
     await _dbr
         .child(roomLink + "/participants/${_configs.myParticipantID}")
-        .update({'last_seen_message': msg.id});
+        .update({
+      'last_seen_message': lastMessage.id,
+      'last_seen_message_index': lastMessageIndex
+    });
     await _dbr
         .child(
             _configs.usersLink + "/${_configs.myParticipantID}/rooms/$id/data")
-        .update({'last_seen_message': msg.id});
+        .update({
+      'last_seen_message': lastMessage.id,
+      'last_seen_message_index': lastMessageIndex
+    });
     _setUserRoomData(true);
   }
 
