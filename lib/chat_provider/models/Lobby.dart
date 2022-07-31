@@ -24,6 +24,7 @@ class Lobby {
   Lobby() {
     _configs = FirebaseChatConfigs.instance;
     _dbr = FirebaseDatabase.instance.reference();
+    FirebaseDatabase.instance.setPersistenceEnabled(true);
   }
 
   //listen to lobby rooms updates(last_message, new participants, etc)

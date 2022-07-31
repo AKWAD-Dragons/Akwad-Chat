@@ -40,7 +40,8 @@ class ChatProvider {
     if (FirebaseAuth.instance.currentUser != null) {
       FirebaseChatConfigs.instance.myParticipantID =
           FirebaseAuth.instance.currentUser.uid;
-      //SKIP Authorization
+      await _postAuthConfigs();
+      return;
     }
     UserCredential creds;
     creds = await FirebaseAuth.instance
@@ -56,6 +57,10 @@ class ChatProvider {
               FirebaseChatConfigs.instance.myParticipantID = value.user.uid)
           .catchError((e) => throw e);
     });
+    await _postAuthConfigs();
+  }
+
+  Future<void> _postAuthConfigs() async {
     await subscribeToNotifications();
     _isInit = true;
   }
