@@ -19,6 +19,7 @@ class Room {
   String name;
   String image;
   List<Participant> participants;
+  @JsonKey(ignore: true)
   List<Message> messages;
   @JsonKey(name: "meta_data")
   LinkedHashMap<String, dynamic> metaData;
@@ -38,7 +39,7 @@ class Room {
   @JsonKey(ignore: true)
   bool _ignoredFirstMessagesOnValue = false;
 
-  Room(this.name, this.image, this.participants, this.messages, this.metaData,
+  Room(this.name, this.image, this.participants, this.metaData,
       this.userRoomData, this.lastMessage, this.lastMessageIndex);
 
   //gets room name if it's not null
