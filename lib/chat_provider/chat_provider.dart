@@ -40,8 +40,6 @@ class ChatProvider {
     if (FirebaseAuth.instance.currentUser != null) {
       FirebaseChatConfigs.instance.myParticipantID =
           FirebaseAuth.instance.currentUser.uid;
-      await _postAuthConfigs();
-      return;
     }
     UserCredential creds;
     creds = await FirebaseAuth.instance
