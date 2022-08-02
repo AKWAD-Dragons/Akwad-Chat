@@ -15,7 +15,7 @@ class Lobby {
   FirebaseChatConfigs _configs;
   DatabaseReference _dbr;
   Participant _myParticipant;
-  List<Room> rooms;
+  Map<String, Room> rooms = {};
   Map<String, dynamic> _userRoomConfigs = {};
   BehaviorSubject<Room> _roomsSubject = BehaviorSubject<Room>();
   Map<String, StreamSubscription> stSubs = {};
@@ -42,7 +42,7 @@ class Lobby {
             .listen((Event roomSnapshot) {
           Room room = _parseRoomFromSnapshotValue(
               roomSnapshot.snapshot.key, roomSnapshot.snapshot.value);
-
+          rooms[room.id] = room;
           bool isDeleted = false;
           if (room.lastMessage != null &&
               _userRoomConfigs.containsKey(room.id) &&
@@ -67,7 +67,7 @@ class Lobby {
     if (rooms == null) {
       rooms = await getAllRooms();
     }
-    rooms.forEach((Room room) {
+    rooms.forEach((String key, Room room) {
       if (room.unreadMessagesCount > 0) {
         unreadRoomsCount++;
       }
@@ -106,7 +106,7 @@ class Lobby {
   }
 
   //get rooms without listening to them
-  Future<List<Room>> getAllRooms() async {
+  Future<Map<String, Room>> getAllRooms() async {
     DataSnapshot snapshot = await _dbr
         .child(_configs.usersLink + "/" + _configs.myParticipantID + "/rooms")
         .once();
@@ -140,11 +140,12 @@ class Lobby {
   }
 
   //parse rooms from snapshot value
-  List<Room> _parseRoomsFromSnapshots(List<DataSnapshot> snapshots) {
-    List<Room> rooms = [];
+  Map<String, Room> _parseRoomsFromSnapshots(List<DataSnapshot> snapshots) {
+    Map<String, Room> rooms = {};
     for (DataSnapshot dataSnap in snapshots) {
       if (dataSnap == null) continue;
-      rooms.add(_parseRoomFromSnapshotValue(dataSnap.key, dataSnap.value));
+      rooms[dataSnap.key] =
+          _parseRoomFromSnapshotValue(dataSnap.key, dataSnap.value);
     }
 
     return rooms;
