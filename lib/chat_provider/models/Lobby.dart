@@ -42,7 +42,6 @@ class Lobby {
             .listen((Event roomSnapshot) {
           Room room = _parseRoomFromSnapshotValue(
               roomSnapshot.snapshot.key, roomSnapshot.snapshot.value);
-          rooms[room.id] = room;
           bool isDeleted = false;
           if (room.lastMessage != null &&
               _userRoomConfigs.containsKey(room.id) &&
@@ -54,6 +53,7 @@ class Lobby {
           if (isDeleted) {
             return;
           }
+          rooms[room.id] = room;
           _roomsSubject.add(room);
         });
       });
