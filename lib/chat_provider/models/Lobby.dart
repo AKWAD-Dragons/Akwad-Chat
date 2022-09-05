@@ -129,7 +129,7 @@ class Lobby {
 
   List<DataSnapshot> _filterDataSnaps(
       DataSnapshot lobby, List<DataSnapshot> rooms) {
-    dynamic lobbyRooms = lobby.value.values;
+    dynamic lobbyRooms = lobby.value?.values;
     return rooms.where((room) {
       var lobbyRoom =
           lobbyRooms.firstWhere((lobbyRoom) => lobbyRoom['id'] == room.key);
