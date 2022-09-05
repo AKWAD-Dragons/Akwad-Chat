@@ -81,13 +81,15 @@ class Lobby {
         .child(_configs.usersLink + "/" + _configs.myParticipantID + '/rooms')
         .once();
     List<Room> rooms = [];
-    snapshot.value.forEach((key, value) {
-      Room room = _parseRoomFromSnapshotValue(key, value);
-      rooms.add(room);
-      if (room.userRoomData != null) {
-        _userRoomConfigs[key] = room.userRoomData;
-      }
-    });
+    if (snapshot.value != null) {
+      snapshot.value.forEach((key, value) {
+        Room room = _parseRoomFromSnapshotValue(key, value);
+        rooms.add(room);
+        if (room.userRoomData != null) {
+          _userRoomConfigs[key] = room.userRoomData;
+        }
+      });
+    }
     return rooms;
   }
 
@@ -101,7 +103,9 @@ class Lobby {
         .listen((event) {
       Room room =
           _parseRoomFromSnapshotValue(event.snapshot.key, event.snapshot.value);
-      _userRoomConfigs[room.id] = room.userRoomData;
+      if (room != null) {
+        _userRoomConfigs[room.id] = room.userRoomData;
+      }
     });
   }
 
@@ -111,9 +115,12 @@ class Lobby {
         .child(_configs.usersLink + "/" + _configs.myParticipantID + "/rooms")
         .once();
     List<Future<DataSnapshot>> futures = [];
-    snapshot.value.values.forEach((valueMap) {
-      futures.add(_dbr.child(_configs.roomsLink + "/" + valueMap['id']).once());
-    });
+    if (snapshot.value?.values != null) {
+      snapshot.value.values.forEach((valueMap) {
+        futures
+            .add(_dbr.child(_configs.roomsLink + "/" + valueMap['id']).once());
+      });
+    }
     List<DataSnapshot> dataSnaps = await Future.wait(futures);
     dataSnaps = _filterDataSnaps(snapshot, dataSnaps);
     rooms = _parseRoomsFromSnapshots(dataSnaps);
