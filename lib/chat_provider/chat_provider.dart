@@ -5,6 +5,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'FirebaseChatConfigs.dart';
 import 'models/Lobby.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:learnovia/utilities/internet_cache_helper.dart';
+
 /*
   ***Starting Point***
   1-Before you call ChatProvider() you will first need to call
@@ -36,26 +39,45 @@ class ChatProvider {
         could be used to refresh token passed to FirebaseChatConfigs.init
    */
   Future<void> init(Future<String> onTokenExpired()) async {
+    SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    
+    if (_isInit) return;
+    
     await Firebase.initializeApp();
-    if (FirebaseAuth.instance.currentUser != null) {
+   
+    bool isConnected = await InternetCacheHelper.isConnected();
+   
+   if (FirebaseAuth.instance.currentUser != null) {
       FirebaseChatConfigs.instance.myParticipantID =
           FirebaseAuth.instance.currentUser.uid;
     }
-    UserCredential creds;
-    creds = await FirebaseAuth.instance
-        .signInWithCustomToken(FirebaseChatConfigs.instance.myParticipantToken)
-        .catchError((ex) async {
-      print("Token is invalid or expired\nretrying with onTokenExpired");
-      FirebaseChatConfigs.instance
-          .init(myParticipantToken: await onTokenExpired());
-      await FirebaseAuth.instance
+   
+    if (isConnected) {
+      UserCredential creds;
+      creds = await FirebaseAuth.instance
           .signInWithCustomToken(
-              FirebaseChatConfigs.instance.myParticipantToken)
-          .then((value) =>
-              FirebaseChatConfigs.instance.myParticipantID = value.user.uid)
-          .catchError((e) => throw e);
-    });
-    await _postAuthConfigs();
+          FirebaseChatConfigs.instance.myParticipantToken)
+          .catchError((ex) async {
+        print("Token is invalid or expired\nretrying with onTokenExpired");
+        FirebaseChatConfigs.instance
+            .init(myParticipantToken: await onTokenExpired());
+        await FirebaseAuth.instance
+            .signInWithCustomToken(
+            FirebaseChatConfigs.instance.myParticipantToken)
+            .then((value) =>
+        {
+          FirebaseChatConfigs.instance.myParticipantID = value.user.uid,
+          sharedPrefs.setString("ChatUserId", value.user.uid)
+        })
+            .catchError((e) => throw e);
+      });
+      await _postAuthConfigs();
+    }
+    else {
+      String chatUserID = await sharedPrefs.getString("ChatUserId");
+      FirebaseChatConfigs.instance.myParticipantID = chatUserID;
+      _isInit=true;
+    }
   }
 
   Future<void> _postAuthConfigs() async {
